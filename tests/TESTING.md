@@ -1,6 +1,8 @@
 # Testing and verification
 
-Edition verified: 2026-11-02, `index.html`, SHA-256 `4021d024c014d223afabcd1747e66f8dadaabf0a20b9728b6e2eb8643a4ad9ed`.
+Original feature tests (v1.0.0): SHA-256 `4021d024c014d223afabcd1747e66f8dadaabf0a20b9728b6e2eb8643a4ad9ed`.
+
+Current published and repository version (v1.0.1): SHA-256 `c87e48f01034f27b0f1fab943c93a747c5483b4002d2440b955c117159fda99e`.
 
 ## Automated browser checks — passed
 
