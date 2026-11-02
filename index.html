@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Easy Icon Changer | QuoteCraft Studio</title>
+  <meta name="description" content="Choose a custom icon, find images from your device, inspect shortcuts and APKs, and create a Windows desktop web launcher with its own icon.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .glow-on-hover:hover {
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center p-4 sm:p-8 font-sans">
+
+  <!-- Header -->
+  <header class="text-center mb-8">
+    <div class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 border border-indigo-500/30 rounded-full text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-3">
+      ⚡ One-Step App & Icon Customizer
+    </div>
+    <h1 class="text-3xl sm:text-5xl font-black bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
+      Super Easy Icon Changer
+    </h1>
+    <p class="text-slate-400 text-sm sm:text-base mt-2 max-w-lg mx-auto">
+      Drag your App, APK, or Shortcut into the box. Pick or generate a fresh icon, and keep your launch link active.
+    </p>
+  </header>
+
+  <main class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+
+    <!-- LEFT: Drag & Drop Zone + Current App Status -->
+    <div class="flex flex-col gap-5">
+      <!-- Dropzone -->
+      <div id="dropzone" role="button" tabindex="0" aria-label="Choose an application, APK, web shortcut or icon file" class="border-2 border-dashed border-indigo-500/40 hover:border-indigo-400 bg-slate-900/60 rounded-3xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 glow-on-hover min-h-[260px]">
+        <input type="file" id="fileInput" class="hidden" accept=".apk,.url,.lnk,.exe,.app,.html,.htm,.desktop,.webloc,.png,.jpg,.jpeg,.svg,.webp,.ico,.gif">
+        
+        <div id="drop-preview" class="flex flex-col items-center">
+          <div class="w-20 h-20 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mb-4 text-indigo-400 text-3xl shadow-inner shadow-indigo-500/10">
+            <i class="fa-solid fa-cloud-arrow-up animate-bounce"></i>
+          </div>
+          <p class="font-bold text-lg text-slate-200">Drag & Drop App / APK / Shortcut here</p>
+          <p class="text-xs text-slate-400 mt-1">or click to browse from this device</p>
+        </div>
+      </div>
+
+      <!-- App Card Info -->
+      <div id="appInfoCard" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col gap-4">
+        <div class="flex items-center gap-4">
+          <!-- Active Icon Preview -->
+          <div id="activeIconContainer" class="w-16 h-16 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-3xl shadow-md overflow-hidden shrink-0">
+            <i class="fa-solid fa-cube text-slate-500"></i>
+          </div>
+          <div class="overflow-hidden">
+            <h2 id="targetAppName" class="font-bold text-lg text-slate-100 truncate">No App Selected</h2>
+            <p id="targetAppType" class="text-xs text-indigo-400 font-mono truncate">Waiting for input...</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+          <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Target Link / Action:</label>
+          <input type="text" id="targetAppLink" placeholder="https://example.com or app link" class="w-full bg-transparent text-sm text-slate-200 focus:outline-none border-b border-slate-700 focus:border-indigo-400 pb-1">
+        </div>
+
+        <!-- Launch / Drag-Back Controls -->
+        <div class="flex gap-2">
+          <button id="launchBtn" class="flex-1 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open / Test Launch
+          </button>
+          <button id="downloadShortcutBtn" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium text-sm flex items-center gap-2 transition" title="Download updated launcher">
+            <i class="fa-solid fa-download"></i> Save Shortcut
+          </button>
+        </div>
+        <button id="downloadIconBtn" type="button" class="rounded-xl py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm border border-slate-700">Save Icon Only (.ico)</button>
+        <p id="appStatus" role="status" aria-live="polite" class="text-xs text-slate-400 leading-5">Choose a file or drop an HTTP(S) web link. On Windows, saved shortcuts contain the .url launcher and its matching .ico in a ZIP.</p>
+      </div>
+    </div>
+
+    <!-- RIGHT: Instant Icon Chooser & Auto-Generator -->
+    <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 flex flex-col gap-5">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <h2 class="font-bold text-lg">Pick or Generate Icon</h2>
+          <p class="text-xs text-slate-400">Click any icon to instantly replace the current one</p>
+        </div>
+        <button id="autoGenerateBtn" class="px-3 py-1.5 text-xs bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 rounded-lg flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Generate
+        </button>
+      </div>
+
+      <!-- Icon Search -->
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-sm"></i>
+        <input type="text" id="iconSearchInput" placeholder="Search icons (e.g. Music, Game, Browser, Chat)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-400">
+      </div>
+
+      <!-- Styles Filter -->
+      <div class="flex gap-2 text-xs overflow-x-auto pb-1" id="stylePills">
+        <button data-style="all" class="px-3 py-1 rounded-full bg-indigo-600 text-white font-medium">All</button>
+        <button data-style="gradient" class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700">Gradients</button>
+        <button data-style="minimal" class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700">Minimal 3D</button>
+        <button data-style="neon" class="px-3 py-1 rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700">Neon</button>
+      </div>
+
+      <!-- Icons Grid -->
+      <div id="iconGrid" class="grid grid-cols-4 sm:grid-cols-5 gap-3 max-h-[300px] overflow-y-auto p-1">
+        <!-- Icons populated dynamically by JS -->
+      </div>
+
+      <!-- Icons stored on this device; user-selected files only. -->
+      <section class="border-t border-slate-800 pt-4 flex flex-col gap-3" aria-label="Search icons on your device">
+        <h3 class="font-semibold text-sm text-slate-200">Search My Device for Icons</h3>
+        <p class="text-xs text-slate-400">Choose icon images or a folder on your computer or phone. Nothing is uploaded. Some phones support file selection but not folder selection.</p>
+        <div class="flex gap-2 flex-wrap">
+          <button id="chooseIconFilesBtn" type="button" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-medium">Choose Icon Files</button>
+          <button id="chooseIconFolderBtn" type="button" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-xs font-medium">Search a Folder</button>
+        </div>
+        <input id="deviceIconFiles" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,.svg,.ico,image/*" multiple class="hidden">
+        <input id="deviceIconFolder" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,.svg,.ico" webkitdirectory directory multiple class="hidden">
+        <input id="deviceIconSearch" type="search" placeholder="Find selected icons by filename..." aria-label="Filter your selected icons by filename" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-400">
+        <p id="deviceResultCount" class="text-xs text-slate-400">0 icons</p>
+        <div id="deviceIconGrid" class="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-[250px] overflow-y-auto" aria-live="polite"></div>
+      </section>
+
+      <!-- Custom Icon Designer Bar -->
+      <div class="border-t border-slate-800 pt-4 flex flex-col gap-2">
+        <label class="text-xs text-slate-400 font-medium">Or create from letter / emoji:</label>
+        <div class="flex gap-2 items-center">
+          <input type="text" id="customGlyph" maxlength="2" value="✦" class="w-12 h-10 bg-slate-950 border border-slate-800 rounded-xl text-center text-lg font-bold">
+          <input type="color" id="customBgColor1" value="#6366f1" class="w-10 h-10 rounded-xl border border-slate-700 bg-transparent cursor-pointer">
+          <input type="color" id="customBgColor2" value="#a855f7" class="w-10 h-10 rounded-xl border border-slate-700 bg-transparent cursor-pointer">
+          <button id="applyCustomIcon" class="flex-1 h-10 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition">
+            Apply Custom Icon
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <canvas id="exportCanvas" width="256" height="256" class="hidden"></canvas>
+
+  <script>
+  'use strict';
+  const currentAppState = {name:'',type:'',link:'',kind:'',iconType:'icon',iconData:'fa-rocket',bgGradient:'bg-gradient-to-tr from-indigo-500 to-rose-500',imageUrl:null};
+  const iconLibrary = [
+    {id:'fa-rocket',tag:'app launch game speed',bg:'bg-gradient-to-tr from-indigo-500 to-rose-500',style:'gradient',glyph:'🚀'},
+    {id:'fa-music',tag:'audio music player spotify sound',bg:'bg-gradient-to-tr from-emerald-400 to-cyan-500',style:'gradient',glyph:'♫'},
+    {id:'fa-comment-dots',tag:'chat message whatsapp messenger',bg:'bg-gradient-to-tr from-blue-500 to-cyan-400',style:'gradient',glyph:'●'},
+    {id:'fa-camera',tag:'photo camera picture',bg:'bg-gradient-to-tr from-pink-500 to-amber-500',style:'gradient',glyph:'📷'},
+    {id:'fa-compass',tag:'browser web safari chrome internet',bg:'bg-gradient-to-tr from-blue-600 to-indigo-700',style:'minimal',glyph:'✦'},
+    {id:'fa-gamepad',tag:'game playstation xbox arcade',bg:'bg-gradient-to-tr from-violet-600 to-fuchsia-600',style:'neon',glyph:'🎮'},
+    {id:'fa-folder-open',tag:'files manager documents storage',bg:'bg-gradient-to-tr from-amber-400 to-orange-500',style:'minimal',glyph:'📁'},
+    {id:'fa-terminal',tag:'code dev programmer terminal',bg:'bg-slate-900 border border-emerald-500/50 text-emerald-400',style:'neon',glyph:'>_'},
+    {id:'fa-video',tag:'youtube video netflix movies stream',bg:'bg-gradient-to-tr from-red-600 to-rose-500',style:'gradient',glyph:'▶'},
+    {id:'fa-cart-shopping',tag:'shop store cart buy',bg:'bg-gradient-to-tr from-teal-500 to-emerald-600',style:'minimal',glyph:'🛒'},
+    {id:'fa-shield-halved',tag:'security vpn antivirus protect',bg:'bg-gradient-to-tr from-indigo-600 to-slate-900',style:'minimal',glyph:'◆'},
+    {id:'fa-bolt',tag:'lightning power energy speed tool',bg:'bg-gradient-to-tr from-yellow-400 to-amber-600',style:'neon',glyph:'⚡'},
+    {id:'fa-envelope',tag:'email mail contact letter',bg:'bg-gradient-to-tr from-sky-400 to-blue-600',style:'gradient',glyph:'✉'},
+    {id:'fa-heart-pulse',tag:'fitness health heart workout',bg:'bg-gradient-to-tr from-rose-500 to-pink-600',style:'gradient',glyph:'♥'},
+    {id:'fa-cloud',tag:'cloud weather drive backup',bg:'bg-gradient-to-tr from-cyan-400 to-blue-500',style:'minimal',glyph:'☁'}
+  ];
+  const $ = id => document.getElementById(id);
+  const dropzone=$('dropzone'),fileInput=$('fileInput'),targetAppName=$('targetAppName'),targetAppType=$('targetAppType'),targetAppLink=$('targetAppLink');
+  const activeIconContainer=$('activeIconContainer'),iconGrid=$('iconGrid'),iconSearchInput=$('iconSearchInput');
+  const launchBtn=$('launchBtn'),downloadShortcutBtn=$('downloadShortcutBtn'),autoGenerateBtn=$('autoGenerateBtn'),applyCustomIcon=$('applyCustomIcon');
+  const customGlyph=$('customGlyph'),customBgColor1=$('customBgColor1'),customBgColor2=$('customBgColor2');
+  const localIconGrid=$('deviceIconGrid'),deviceSearch=$('deviceIconSearch'),status=$('appStatus');
+  const iconFileInput=$('deviceIconFiles'),iconFolderInput=$('deviceIconFolder');
+  const encoder=new TextEncoder();
+  let deviceIcons=[],selectedStyle='all',currentFileObjectUrl=null;
+  const iconExtensions=/\.(png|jpe?g|webp|gif|svg|ico)$/i;
+  function notice(message,problem=false){status.textContent=message;status.classList.toggle('text-rose-300',problem);status.classList.toggle('text-slate-400',!problem);}
+  function safeWebLink(link){
+    try{const u=new URL(link);return (u.protocol==='https:'||u.protocol==='http:') && !!u.hostname;}catch{return false;}
+  }
+  function setTarget(name,type,link,kind){
+    currentAppState.name=name||'Web Link';currentAppState.type=type;
+    currentAppState.link=link||'';currentAppState.kind=kind;
+    targetAppName.textContent=currentAppState.name;targetAppType.textContent=type;targetAppLink.value=link||'';
+    iconSearchInput.value=(name||'').split(/[\s._-]+/)[0]||'';
+    renderIcons(iconSearchInput.value,selectedStyle);
+    if(iconGrid.textContent.includes('No icons found'))generateFromLetter(currentAppNameLetter());
+  }
+  function renderIcons(filter='',style='all'){
+    iconGrid.replaceChildren();
+    const matching=iconLibrary.filter(item=>(item.tag+' '+item.id).toLowerCase().includes(filter.toLowerCase())&&(style==='all'||item.style===style));
+    if(!matching.length){const p=document.createElement('p');p.className='col-span-full text-center text-xs text-slate-500 py-6';p.textContent='No icons found. Try Auto-Generate or search your device below.';iconGrid.append(p);return;}
+    matching.forEach(icon=>{
+      const btn=document.createElement('button');btn.type='button';btn.className=`w-14 h-14 rounded-2xl flex items-center justify-center text-xl text-white shadow-md transition transform hover:scale-110 active:scale-95 ${icon.bg}`;
+      btn.title=`Use ${icon.id.replace('fa-','')} icon`;btn.setAttribute('aria-label',btn.title);
+      const i=document.createElement('i');i.className='fa-solid '+icon.id;btn.append(i);
+      btn.onclick=()=>applySelectedIcon({type:'icon',iconClass:icon.id,bgClass:icon.bg});iconGrid.append(btn);
+    });
+  }
+  function applySelectedIcon(config){
+    currentAppState.iconType=config.type;
+    activeIconContainer.className='w-16 h-16 rounded-2xl flex items-center justify-center text-2xl shadow-lg transition-transform overflow-hidden shrink-0';
+    activeIconContainer.style.background='';
+    activeIconContainer.replaceChildren();
+    if(config.type==='icon'){
+      currentAppState.iconData=config.iconClass;currentAppState.bgGradient=config.bgClass;
+      activeIconContainer.className+=' '+config.bgClass+' text-white';
+      const i=document.createElement('i');i.className='fa-solid '+config.iconClass;activeIconContainer.append(i);
+    }else if(config.type==='image'){
+      currentAppState.iconData=config.file.name;
+      currentAppState.imageUrl=config.objectUrl;
+      const img=document.createElement('img');img.src=config.objectUrl;img.alt='Selected icon';img.className='w-full h-full object-cover';activeIconContainer.append(img);
+    }else if(config.type==='custom'){
+      currentAppState.iconData=config.glyph;currentAppState.c1=config.c1;currentAppState.c2=config.c2;
+      activeIconContainer.style.background=`linear-gradient(135deg, ${config.c1}, ${config.c2})`;
+      const span=document.createElement('span');span.className='font-black text-2xl text-white drop-shadow';span.textContent=config.glyph;activeIconContainer.append(span);
+    }
+  }
+  function currentAppNameLetter(){const n=targetAppName.textContent.trim();return n&&n!=='No App Selected'?n.charAt(0).toUpperCase():'★';}
+  function generateFromLetter(glyph){
+    const colors=[['#4f46e5','#ec4899'],['#06b6d4','#3b82f6'],['#10b981','#6366f1'],['#f59e0b','#ef4444'],['#8b5cf6','#d946ef']];
+    const pair=colors[Math.floor(Math.random()*colors.length)];
+    applySelectedIcon({type:'custom',glyph:glyph||currentAppNameLetter(),c1:pair[0],c2:pair[1]});
+  }
+  // Parse standard Windows .url text; do not invent destinations when the file has none.
+  function parseInternetShortcut(text){
+    const line=text.replace(/^\uFEFF/,'').split(/\r?\n/).find(l=>/^\s*URL\s*=/i.test(l));
+    return line?line.replace(/^\s*URL\s*=/i,'').trim():'';
+  }
+  // Windows Shell Link (.lnk) local base path, if present. A browser cannot execute local files.
+  function parseLnk(buffer){
+    const b=new DataView(buffer);if(b.byteLength<0x4c||b.getUint32(0,true)!==0x4c)return '';
+    const flags=b.getUint32(0x14,true);let o=0x4c;
+    if(flags&1){if(o+2>b.byteLength)return '';o+=2+b.getUint16(o,true);}
+    if(!(flags&2)||o+0x1c>b.byteLength)return '';
+    const infoSize=b.getUint32(o,true),headerSize=b.getUint32(o+4,true);
+    if(infoSize<0x1c||o+infoSize>b.byteLength)return '';
+    let path='';
+    if(headerSize>=0x24&&o+0x20<b.byteLength){const rel=b.getUint32(o+0x1c,true);if(rel&&rel<infoSize){let i=o+rel;while(i+1<o+infoSize){const n=b.getUint16(i,true);if(!n)break;path+=String.fromCharCode(n);i+=2;}}}
+    if(!path){const rel=b.getUint32(o+0x10,true);if(rel&&rel<infoSize){let i=o+rel;while(i<o+infoSize){const n=b.getUint8(i++);if(!n)break;path+=String.fromCharCode(n);}}}
+    return path;
+  }
+  // ZIP central directory reader: accesses the AndroidManifest.xml entry without uploading APKs.
+  async function apkManifestBytes(file){
+    const tail=new Uint8Array(await file.slice(Math.max(0,file.size-65557)).arrayBuffer());
+    let eocd=-1;for(let i=tail.length-22;i>=0;i--){if(tail[i]===80&&tail[i+1]===75&&tail[i+2]===5&&tail[i+3]===6){eocd=i;break;}}
+    if(eocd<0)throw Error('APK is not a readable ZIP archive');
+    const v=new DataView(tail.buffer),n=v.getUint16(eocd+10,true),centralSize=v.getUint32(eocd+12,true),centralOffset=v.getUint32(eocd+16,true);
+    if(n>50000||centralSize>file.size||centralOffset+centralSize>file.size)throw Error('Unsupported APK archive');
+    const central=new DataView(await file.slice(centralOffset,centralOffset+centralSize).arrayBuffer());
+    let p=0,meta;
+    for(let k=0;k<n&&p+46<=central.byteLength;k++){
+      if(central.getUint32(p,true)!==0x02014b50)break;
+      const nameLength=central.getUint16(p+28,true),extra=central.getUint16(p+30,true),comment=central.getUint16(p+32,true);
+      const nameBytes=new Uint8Array(central.buffer,p+46,nameLength);
+      const name=new TextDecoder().decode(nameBytes);
+      if(name==='AndroidManifest.xml')meta={method:central.getUint16(p+10,true),size:central.getUint32(p+24,true),compressed:central.getUint32(p+20,true),offset:central.getUint32(p+42,true)};
+      p+=46+nameLength+extra+comment;
+    }
+    if(!meta||meta.size>16000000||meta.compressed>16000000)throw Error('Android manifest not found or too large');
+    const head=new DataView(await file.slice(meta.offset,meta.offset+30).arrayBuffer());
+    if(head.byteLength<30||head.getUint32(0,true)!==0x04034b50)throw Error('Invalid APK manifest entry');
+    const start=meta.offset+30+head.getUint16(26,true)+head.getUint16(28,true);
+    if(start+meta.compressed>file.size)throw Error('Incomplete APK manifest');
+    const bytes=await file.slice(start,start+meta.compressed).arrayBuffer();
+    if(meta.method===0)return bytes;
+    if(meta.method!==8||typeof DecompressionStream==='undefined')throw Error('APK manifest compression unsupported');
+    const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return await new Response(stream).arrayBuffer();
+  }
+  function apkPackageFromManifest(buffer){
+    const v=new DataView(buffer);if(v.byteLength<8||v.getUint16(0,true)!==3)return '';
+    const lengthAt=(o,utf8)=>{let value=v.getUint8(o),pos=o+1;if(value&128){value=((value&127)<<8)|v.getUint8(pos++);}if(!utf8){value=v.getUint16(o,true);pos=o+2;if(value&32768){value=((value&32767)<<16)|v.getUint16(pos,true);pos+=2;}}return [value,pos];};
+    let strings=[],off=8;
+    while(off+8<=v.byteLength){const type=v.getUint16(off,true),head=v.getUint16(off+2,true),size=v.getUint32(off+4,true);if(size<8||off+size>v.byteLength)break;
+      if(type===1&&head>=28){
+        const cnt=v.getUint32(off+8,true),flags=v.getUint32(off+16,true),start=v.getUint32(off+20,true),utf8=!!(flags&256);
+        if(cnt>200000)throw Error('Unsupported string pool');
+        for(let i=0;i<cnt;i++){
+          let pos=off+head+i*4;if(pos+4>off+size)break;
+          pos=off+start+v.getUint32(pos,true);
+          if(pos>=off+size)break;
+          let len;
+          if(utf8){[,pos]=lengthAt(pos,true);[len,pos]=lengthAt(pos,true);if(pos+len>off+size)break;strings.push(new TextDecoder().decode(new Uint8Array(buffer,pos,len)));}
+          else{[len,pos]=lengthAt(pos,false);if(pos+len*2>off+size)break;let s='';for(let j=0;j<len;j++)s+=String.fromCharCode(v.getUint16(pos+j*2,true));strings.push(s);}
+        }
+      }
+      if(type===0x102&&head>=16&&off+36<=v.byteLength){
+        const nameIdx=v.getUint32(off+20,true),attrStart=v.getUint16(off+24,true),attrSize=v.getUint16(off+26,true),count=v.getUint16(off+28,true);
+        if(strings[nameIdx]==='manifest'&&attrSize>=20){
+          for(let i=0;i<count;i++){
+            const a=off+16+attrStart+i*attrSize;if(a+20>off+size)break;
+            if(strings[v.getUint32(a+4,true)]!=='package')continue;
+            const raw=v.getUint32(a+8,true),typ=v.getUint8(a+15),data=v.getUint32(a+16,true);
+            const pkg=strings[raw===0xffffffff&&typ===3?data:raw]||'';
+            return /^[A-Za-z_][\w]*(?:\.[A-Za-z_][\w]*)+$/.test(pkg)?pkg:'';
+          }
+        }
+      }
+      off+=size;
+    }
+    return '';
+  }
+  async function analyzeFile(file){
+    if(!file)return;
+    const name=file.name.replace(/\.[^.]+$/,'')||file.name,ext=file.name.split('.').pop().toLowerCase();
+    let link='',kind='file',type='Local file';
+    if(iconExtensions.test(file.name)){
+      addDeviceIcons([file]);const item=deviceIcons.find(x=>x.file===file);if(item)applySelectedIcon({type:'image',file:item.file,objectUrl:item.url});notice('Icon image selected: '+file.name);return;
+    }
+    try{
+      if(ext==='url'){
+        link=parseInternetShortcut(await file.text());kind='web';type='Internet shortcut (.url)';
+        if(!safeWebLink(link)){notice('The .url file has no valid HTTP(S) web destination.',true);link='';}
+      }else if(ext==='webloc'){
+        const doc=new DOMParser().parseFromString(await file.text(),'application/xml');
+        link=doc.querySelector('string')?.textContent?.trim()||'';kind='web';type='Mac internet location (.webloc)';
+        if(!safeWebLink(link)){link='';notice('No usable web destination found in .webloc.',true);}
+      }else if(ext==='apk'){
+        type='Android APK';kind='apk';
+        try{const pkg=apkPackageFromManifest(await apkManifestBytes(file));
+          if(pkg){type+=' — '+pkg;notice('Android package identified: '+pkg+'. An installed Android app cannot be launched from a website by package name alone. Add a verified web/deep link if available.');}
+          else notice('APK loaded. Package identifier could not be read; no launch link was invented.',true);
+        }catch(err){notice('APK loaded, but its Android manifest could not be inspected: '+err.message,true);}
+      }else if(ext==='lnk'){
+        kind='local';type='Windows shortcut (.lnk)';
+        const path=parseLnk(await file.arrayBuffer());
+        if(safeWebLink(path)){link=path;kind='web';}
+        else{link=path;notice('Windows program paths cannot be launched from a website. You can save an icon for use in Windows shortcut Properties.');}
+      }else if(ext==='desktop'){
+        kind='local';type='Linux shortcut';const exec=(await file.text()).split(/\r?\n/).find(line=>/^Exec=/.test(line));
+        if(exec){const match=exec.match(/https?:\/\/[^\s"']+/);if(match){link=match[0];kind='web';}}
+        if(!link)notice('Linux application commands cannot run inside a webpage; add a web URL to make an internet shortcut.');
+      }else if(ext==='html'||ext==='htm'){kind='local';type='HTML file';notice('Local HTML files need to be opened through your device; web pages cannot create a working file shortcut automatically.');}
+      else{kind='local';type=ext.toUpperCase()+' application';notice('Local programs cannot launch directly from a website. You can save an icon for their native shortcut.');}
+      setTarget(name,type,link,kind);
+    }catch(err){setTarget(name,type,'',kind);notice('Could not analyze that file: '+err.message,true);}
+  }
+  function analyzeDroppedWebLink(text){
+    const value=text.trim().split('\n').find(line=>!line.startsWith('#'))?.trim()||'';
+    if(!safeWebLink(value)){notice('Drop a valid http:// or https:// link.',true);return;}
+    let name='Web Link';try{name=new URL(value).hostname.replace(/^www\./,'');}catch{}
+    setTarget(name,'Web link',value,'web');notice('Web link preserved. Select an icon, then test or save it.');
+  }
+  // Local icon gallery uses user-selected files/folders only; no uploads and no background scanning.
+  function addDeviceIcons(files){
+    const images=Array.from(files).filter(file=>iconExtensions.test(file.name));
+    const have=new Set(deviceIcons.map(x=>x.key));let count=0;
+    for(const file of images){
+      const key=(file.webkitRelativePath||file.name)+'|'+file.size+'|'+file.lastModified;
+      if(have.has(key))continue;have.add(key);
+      deviceIcons.push({key,file,url:URL.createObjectURL(file)});count++;
+    }
+    renderDeviceIcons();
+    notice(count?`Found ${count} new icon image(s); ${deviceIcons.length} selected in this session.`:'No new supported icon images found in that selection.',!count);
+  }
+  function renderDeviceIcons(){
+    localIconGrid.replaceChildren();const query=deviceSearch.value.trim().toLowerCase();
+    const matching=deviceIcons.filter(x=>(x.file.webkitRelativePath||x.file.name).toLowerCase().includes(query));
+    $('deviceResultCount').textContent=`${matching.length} of ${deviceIcons.length} icons`;
+    if(!matching.length){const p=document.createElement('p');p.className='col-span-full text-xs text-slate-500 py-4';p.textContent=deviceIcons.length?'No matching local icons. Try another filename.':'Choose icon files or a folder to see your saved icons here.';localIconGrid.append(p);return;}
+    for(const item of matching){
+      const btn=document.createElement('button');btn.type='button';btn.className='flex flex-col items-center gap-1 rounded-xl p-1 hover:bg-slate-700 text-xs min-w-0';
+      btn.title=item.file.webkitRelativePath||item.file.name;
+      const img=document.createElement('img');img.src=item.url;img.alt='';img.loading='lazy';img.className='w-14 h-14 object-contain rounded-lg bg-slate-800';
+      const label=document.createElement('span');label.className='w-full truncate text-center text-slate-300';label.textContent=item.file.name;
+      btn.append(img,label);btn.onclick=()=>{applySelectedIcon({type:'image',file:item.file,objectUrl:item.url});notice('Selected icon: '+item.file.name);};
+      localIconGrid.append(btn);
+    }
+  }
+  function cssColor(token){
+    const colors={'indigo-500':'#6366f1','indigo-600':'#4f46e5','indigo-700':'#4338ca','rose-500':'#f43f5e','rose-600':'#e11d48','emerald-400':'#34d399','emerald-600':'#059669','cyan-400':'#22d3ee','cyan-500':'#06b6d4','blue-500':'#3b82f6','blue-600':'#2563eb','pink-500':'#ec4899','amber-400':'#fbbf24','amber-500':'#f59e0b','orange-500':'#f97316','violet-600':'#7c3aed','fuchsia-600':'#c026d3','teal-500':'#14b8a6','slate-900':'#0f172a','yellow-400':'#facc15','amber-600':'#d97706','sky-400':'#38bdf8','slate-800':'#1e293b'};
+    return colors[token]||'#6366f1';
+  }
+  function roundedRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+  function loadImage(src){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(Error('Selected image cannot be drawn to canvas'));img.src=src;});}
+  async function renderIconPng(){
+    const canvas=$('exportCanvas'),ctx=canvas.getContext('2d');canvas.width=256;canvas.height=256;ctx.clearRect(0,0,256,256);
+    roundedRect(ctx,0,0,256,256,44);ctx.save();ctx.clip();
+    if(currentAppState.iconType==='image'&&currentAppState.imageUrl){
+      const img=await loadImage(currentAppState.imageUrl);const scale=Math.max(256/img.width,256/img.height),w=img.width*scale,h=img.height*scale;
+      ctx.drawImage(img,(256-w)/2,(256-h)/2,w,h);
+    }else{
+      let c1=currentAppState.c1||'#4f46e5',c2=currentAppState.c2||'#ec4899';
+      if(currentAppState.iconType==='icon'){
+        const bg=currentAppState.bgGradient||'',from=bg.match(/\bfrom-([a-z]+-\d+)/)?.[1],to=bg.match(/\bto-([a-z]+-\d+)/)?.[1];
+        c1=cssColor(from||'slate-900');c2=cssColor(to||from||'slate-900');
+      }
+      const grad=ctx.createLinearGradient(0,256,256,0);grad.addColorStop(0,c1);grad.addColorStop(1,c2);ctx.fillStyle=grad;ctx.fillRect(0,0,256,256);
+      ctx.fillStyle=currentAppState.iconData==='fa-terminal'?'#34d399':'#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+      let glyph=currentAppState.iconData||'★',useFA=false;
+      if(currentAppState.iconType==='icon'){
+        const el=activeIconContainer.querySelector('i');const css=el?getComputedStyle(el,'::before').content:'';
+        if(css&&css!=='none'&&css!=='normal'&&css.length>2){glyph=css.replace(/^['"]|['"]$/g,'');useFA=true;}
+        else glyph=iconLibrary.find(icon=>icon.id===glyph)?.glyph||'✦';
+      }
+      if(useFA&&document.fonts)await document.fonts.ready;
+      ctx.font=useFA?"900 132px 'Font Awesome 6 Free'":"bold 136px system-ui, 'Segoe UI Emoji', sans-serif";
+      ctx.fillText(glyph,128,135,214);
+    }
+    ctx.restore();
+    const png=await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error('Cannot export icon')),'image/png'));
+    return new Uint8Array(await png.arrayBuffer());
+  }
+  function pngAsIco(png){
+    const b=new Uint8Array(22+png.length),v=new DataView(b.buffer);v.setUint16(2,1,true);v.setUint16(4,1,true);
+    b[6]=0;b[7]=0;v.setUint16(10,1,true);v.setUint16(12,32,true);v.setUint32(14,png.length,true);v.setUint32(18,22,true);b.set(png,22);return b;
+  }
+  const crcTable=(()=>{const tab=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xedb88320^(c>>>1):c>>>1;tab[n]=c>>>0;}return tab;})();
+  function crc32(bytes){let c=0xffffffff;for(const b of bytes)c=crcTable[(c^b)&255]^(c>>>8);return(c^0xffffffff)>>>0;}
+  function concatArrays(chunks){const length=chunks.reduce((n,c)=>n+c.length,0),out=new Uint8Array(length);let pos=0;for(const c of chunks){out.set(c,pos);pos+=c.length;}return out;}
+  // Single ZIP download preserves the Windows .url and adjacent ICO together.
+  function zipFiles(entries){
+    const locals=[],centers=[];let offset=0;
+    for(const [name,bytes] of entries){
+      const nm=encoder.encode(name),crc=crc32(bytes);
+      const local=new Uint8Array(30+nm.length),lv=new DataView(local.buffer);
+      lv.setUint32(0,0x04034b50,true);lv.setUint16(4,20,true);lv.setUint16(6,0x0800,true);
+      lv.setUint16(10,0,true);lv.setUint16(12,0,true);lv.setUint16(14,0x5c21,true);
+      lv.setUint32(14,crc,true); // corrected below with standard ZIP header offsets
+      lv.setUint32(14,crc,true);lv.setUint32(18,bytes.length,true);lv.setUint32(22,bytes.length,true);
+      lv.setUint16(26,nm.length,true);local.set(nm,30);
+      // ZIP local header: signature 0, version 4, flags 6, method 8, time 10, date 12, CRC 14.
+      lv.setUint16(12,0x5c21,true);
+      const center=new Uint8Array(46+nm.length),cv=new DataView(center.buffer);
+      cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);cv.setUint16(8,0x0800,true);
+      cv.setUint16(14,0x5c21,true);cv.setUint32(16,crc,true);cv.setUint32(20,bytes.length,true);cv.setUint32(24,bytes.length,true);
+      cv.setUint16(28,nm.length,true);cv.setUint32(42,offset,true);center.set(nm,46);
+      centers.push(center);locals.push(local,bytes);offset+=local.length+bytes.length;
+    }
+    const directory=concatArrays(centers),eocd=new Uint8Array(22),ev=new DataView(eocd.buffer);
+    ev.setUint32(0,0x06054b50,true);ev.setUint16(8,entries.length,true);ev.setUint16(10,entries.length,true);ev.setUint32(12,directory.length,true);ev.setUint32(16,offset,true);
+    return concatArrays([...locals,directory,eocd]);
+  }
+  function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
+  function getWebDestination(){const text=targetAppLink.value.trim();return safeWebLink(text)?text:'';}
+  async function saveShortcut(){
+    const link=getWebDestination();if(!link){notice('A valid http:// or https:// destination is required for a working .url shortcut. For a desktop app, download the icon and set it in Properties.',true);return;}
+    try{
+      const name=(targetAppName.textContent==='No App Selected'?'MyShortcut':targetAppName.textContent).replace(/[\\/:*?"<>|\x00-\x1F]/g,'').trim().slice(0,75)||'MyShortcut';
+      const ico=pngAsIco(await renderIconPng());const urlText=`[InternetShortcut]\r\nURL=${link}\r\nIconFile=.\\${name}.ico\r\nIconIndex=0\r\n`;
+      const archive=zipFiles([[`${name}.url`,encoder.encode(urlText)],[`${name}.ico`,ico]]);
+      downloadBlob(new Blob([archive],{type:'application/zip'}),`${name}-Shortcut.zip`);
+      notice('Saved a ZIP containing the Windows .url shortcut and its custom .ico. Extract BOTH files into the same folder before opening.');
+    }catch(err){notice('Shortcut export failed: '+err.message,true);}
+  }
+  async function saveIconOnly(){try{const name=(targetAppName.textContent||'CustomIcon').replace(/[\\/:*?"<>|\x00-\x1F]/g,'').trim().slice(0,75)||'CustomIcon';downloadBlob(new Blob([pngAsIco(await renderIconPng())],{type:'image/x-icon'}),name+'.ico');notice('Custom .ico downloaded. For local Windows apps, choose this file in the shortcut’s Properties > Change Icon.');}catch(err){notice('Icon export failed: '+err.message,true);}}
+  dropzone.addEventListener('click',()=>fileInput.click());
+  dropzone.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fileInput.click();}});
+  fileInput.addEventListener('change',e=>{if(e.target.files?.length)analyzeFile(e.target.files[0]);fileInput.value='';});
+  for(const name of ['dragenter','dragover'])dropzone.addEventListener(name,e=>{e.preventDefault();dropzone.classList.add('border-indigo-400','bg-indigo-950/20');});
+  for(const name of ['dragleave','drop'])dropzone.addEventListener(name,e=>{e.preventDefault();dropzone.classList.remove('border-indigo-400','bg-indigo-950/20');});
+  dropzone.addEventListener('drop',e=>{
+    if(e.dataTransfer?.files?.length)analyzeFile(e.dataTransfer.files[0]);
+    else{const text=e.dataTransfer?.getData('text/uri-list')||e.dataTransfer?.getData('text/plain');if(text)analyzeDroppedWebLink(text);}
+  });
+  iconFileInput.addEventListener('change',e=>{addDeviceIcons(e.target.files||[]);iconFileInput.value='';});
+  iconFolderInput.addEventListener('change',e=>{addDeviceIcons(e.target.files||[]);iconFolderInput.value='';});
+  deviceSearch.addEventListener('input',renderDeviceIcons);
+  $('chooseIconFilesBtn').onclick=()=>iconFileInput.click();$('chooseIconFolderBtn').onclick=()=>iconFolderInput.click();
+  autoGenerateBtn.onclick=()=>generateFromLetter();
+  applyCustomIcon.onclick=()=>applySelectedIcon({type:'custom',glyph:customGlyph.value||'✦',c1:customBgColor1.value,c2:customBgColor2.value});
+  document.querySelectorAll('#stylePills button').forEach(btn=>btn.onclick=()=>{
+    document.querySelectorAll('#stylePills button').forEach(b=>b.className='px-3 py-1 rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700');
+    btn.className='px-3 py-1 rounded-full bg-indigo-600 text-white font-medium';selectedStyle=btn.dataset.style;renderIcons(iconSearchInput.value,selectedStyle);
+  });
+  iconSearchInput.addEventListener('input',e=>renderIcons(e.target.value,selectedStyle));
+  launchBtn.onclick=()=>{
+    const link=getWebDestination();if(!link){notice('Cannot launch local APKs or programs from a website. Enter a valid web destination to test it.',true);return;}
+    currentAppState.link=link;const w=window.open(link,'_blank','noopener,noreferrer');notice('Opening '+link+(w===null?' (your browser may block new tabs)':''));
+  };
+  downloadShortcutBtn.onclick=saveShortcut;$('downloadIconBtn').onclick=saveIconOnly;
+  renderIcons();renderDeviceIcons();
+  </script>
+</body>
+</html>
