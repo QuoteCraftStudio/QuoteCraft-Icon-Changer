@@ -27,3 +27,9 @@ The live QuoteCraft Studio `IconChanger.html` and `apps.html` returned HTTP 200 
 - Behavior of a wide selection of real APK and `.lnk` formats.
 
 These results describe the tests performed, not a claim of full platform or APK compatibility.
+
+## Consent-notice regression test — 2026-11-02
+
+Local Chromium browser check passed for the Icon Changer consent notice: the checkbox initially remains unchecked, **I agree — open app** is disabled until checked, Privacy and Terms links display correctly, and the original 15 icon choices remain available after acceptance. The notice collects no account or server-side acceptance record.
+
+The apps collection consent popup for APK download links was checked in a browser fixture for checkbox state and cancellation, without changing download targets. On-device APK launches and individual installed Android apps have not been modified by this HTML-only update.

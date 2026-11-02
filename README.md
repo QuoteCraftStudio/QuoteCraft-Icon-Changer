@@ -17,6 +17,13 @@ Choose an icon from your computer or phone, explore ready-made designs, generate
 
 Files selected for icon browsing are handled in your browser. This project does not require an account or upload your icon library to a server.
 
+
+## Privacy, terms and responsibility
+
+Visitors opening the browser edition on **QuoteCraftStudio.ca** see an unchecked acknowledgement before using the app. They can read the [Privacy Notice](https://quotecraftstudio.ca/privacy.html#privacy) and [App Terms & Responsibility Notice](https://quotecraftstudio.ca/terms.html), or choose **Not now** to return to the collection. The notice asks visitors to take responsibility for their own actions, device permissions and files to the extent the law permits; it does **not** remove non-waivable legal rights. No account, signature, or server-side acceptance record is collected by this notice.
+
+The standalone HTML includes the same notice and links; reading the linked online notices requires an internet connection.
+
 ## Quick start
 
 **Use it online:** Visit [Icon Changer](https://quotecraftstudio.ca/IconChanger.html).
