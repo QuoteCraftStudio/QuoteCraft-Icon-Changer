@@ -468,67 +468,6 @@
   downloadShortcutBtn.onclick=saveShortcut;$('downloadIconBtn').onclick=saveIconOnly;
   renderIcons();renderDeviceIcons();
   </script>
-<script id="qc-app-legal-script-v1">
-(function(){
-  'use strict';
-  if (document.getElementById('qc-app-legal-v1')) return;
-  var path=window.location.pathname.toLowerCase();
-  var collection=/(?:^|\/)apps\.html$/.test(path);
-  var host=document.createElement('div');
-  host.id='qc-app-legal-v1';
-  host.style.cssText='position:fixed;top:0;left:0;width:0;height:0;z-index:2147483000;';
-  document.body.appendChild(host);
-  var root=host.attachShadow({mode:'open'});
-  var style=document.createElement('style');
-  style.textContent='.qc-backdrop{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;background:rgba(5,13,30,.86);z-index:1;overflow:auto;overscroll-behavior:contain;font-family:Arial,Helvetica,sans-serif;color:#17213c}.qc-backdrop[hidden]{display:none}.qc-panel{width:min(100%,560px);max-height:min(90vh,850px);overflow:auto;box-sizing:border-box;background:#fff;border:2px solid #6366f1;border-radius:18px;padding:clamp(18px,4vw,30px);box-shadow:0 12px 55px #02081799}.qc-mark{font-size:13px;font-weight:750;letter-spacing:.08em;color:#4f46e5;text-transform:uppercase}.qc-title{font-size:clamp(20px,4vw,26px);font-weight:800;margin:9px 0}.qc-panel p{font-size:15px;line-height:1.55;margin:11px 0}.qc-panel a{color:#1e40af;text-decoration:underline;font-weight:700}.qc-checkrow{display:flex;align-items:flex-start;gap:12px;background:#f2f4ff;border:1px solid #c7d2fe;border-radius:11px;padding:14px;margin:16px 0;cursor:pointer;font-size:14px;line-height:1.5}.qc-check{width:22px;height:22px;flex-shrink:0;margin:0;accent-color:#4f46e5}.qc-actions{display:flex;flex-wrap:wrap;gap:10px}.qc-button{font:700 15px Arial,sans-serif;cursor:pointer;border-radius:10px;padding:12px 17px;min-height:45px;border:1px solid #6366f1}.qc-continue{background:#4338ca;color:white}.qc-continue:disabled{background:#e4e4e7;color:#52525b;border-color:#a1a1aa;cursor:not-allowed}.qc-cancel{background:white;color:#312e81}.qc-links{position:fixed;right:10px;bottom:10px;display:flex;gap:11px;padding:5px 9px;border:1px solid #a5b4fc;border-radius:8px;background:#0f172ae6;font:12px Arial,Helvetica,sans-serif;z-index:0}.qc-links a{color:#fff;text-decoration:underline}.qc-small{font-size:12px!important;color:#475569}.qc-panel *{box-sizing:border-box}@media(max-width:470px){.qc-backdrop{padding:10px}.qc-panel{padding:16px}.qc-actions{flex-direction:column}.qc-button{width:100%}}';
-  root.appendChild(style);
-  if(!collection){
-    var links=document.createElement('nav');links.className='qc-links';links.setAttribute('aria-label','QuoteCraft Studio legal information');
-    var privacy=document.createElement('a');privacy.href='/privacy.html#privacy';privacy.textContent='Privacy';
-    var terms=document.createElement('a');terms.href='/terms.html';terms.textContent='Terms & responsibility';
-    links.appendChild(privacy);links.appendChild(terms);root.appendChild(links);
-  }
-  var backdrop=document.createElement('section');backdrop.className='qc-backdrop';backdrop.hidden=true;
-  backdrop.setAttribute('role','dialog');backdrop.setAttribute('aria-modal','true');backdrop.setAttribute('aria-labelledby','qc-legal-title');
-  backdrop.innerHTML='<div class="qc-panel"><div class="qc-mark">QuoteCraft Studio · Before you continue</div><div id="qc-legal-title" class="qc-title">App terms and responsibility</div><p class="qc-app-name"></p><p>Please review our <a href="/privacy.html#privacy" target="_blank" rel="noopener noreferrer">Privacy Notice</a> and <a href="/terms.html" target="_blank" rel="noopener noreferrer">App Terms & Responsibility Notice</a> before continuing.</p><label class="qc-checkrow"><input class="qc-check" type="checkbox" aria-label="I have read and agree to the terms and understand my responsibilities"><span>I have read and agree to the App Terms. I understand that I use this app at my own discretion and am responsible for my actions, files, device permissions, and checking results, to the extent allowed by law. This does not waive legal rights that cannot be waived.</span></label><div class="qc-actions"><button type="button" class="qc-button qc-continue" disabled>I agree — open app</button><button type="button" class="qc-button qc-cancel">Not now</button></div><p class="qc-small">No account, signature, or server-side acceptance record is created by this notice. A parent or guardian should review these terms before a child uses an app.</p></div>';
-  root.appendChild(backdrop);
-  var checkbox=root.querySelector('.qc-check');var proceed=root.querySelector('.qc-continue');var cancel=root.querySelector('.qc-cancel');var appName=root.querySelector('.qc-app-name');
-  var continuation=null;
-  function show(name, onAgree, buttonLabel){
-    continuation=onAgree;
-    appName.textContent=name||'Selected app';
-    checkbox.checked=false;proceed.disabled=true;proceed.textContent=buttonLabel||'I agree — open app';
-    backdrop.hidden=false;checkbox.focus();
-  }
-  checkbox.addEventListener('change',function(){proceed.disabled=!checkbox.checked;});
-  proceed.addEventListener('click',function(){
-    if(!checkbox.checked)return;
-    backdrop.hidden=true;var next=continuation;continuation=null;
-    if(typeof next==='function')next();
-  });
-  cancel.addEventListener('click',function(){
-    backdrop.hidden=true;continuation=null;
-    if(!collection)window.location.assign('/apps.html');
-  });
-  if(collection){
-    document.addEventListener('click',function(event){
-      var a=event.target && event.target.closest ? event.target.closest('article.card a[href]') : null;
-      if(!a || a.dataset.qcConsentApproved==='true' || event.defaultPrevented)return;
-      var url;
-      try{url=new URL(a.getAttribute('href'),location.href);}catch(e){return;}
-      if(url.origin!==location.origin || !/\.apk$/i.test(url.pathname))return;
-      event.preventDefault();
-      var card=a.closest('article.card');var h=card && card.querySelector('h3');
-      show((h?h.textContent.trim():'App')+' — download',function(){
-        a.dataset.qcConsentApproved='true';
-        try{a.click();}finally{delete a.dataset.qcConsentApproved;}
-      },'I agree — download APK');
-    },true);
-  }else{
-    var name=document.title.split('|')[0].trim();
-    show(name||'QuoteCraft Studio app',function(){},'I agree — open app');
-  }
-})();
-</script>
+<nav data-qc-legal-links="v2" aria-label="Privacy and terms" style="box-sizing:border-box;position:relative;clear:both;text-align:center;margin:18px auto 12px;padding:8px 14px;font:12px/1.6 system-ui,-apple-system,Segoe UI,sans-serif;background:#152238;color:#eef2f7;max-width:max-content;border-radius:6px"><a href="/privacy.html" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Privacy</a><span aria-hidden="true"> · </span><a href="/terms.html" style="color:inherit;text-decoration:underline;text-underline-offset:2px">Terms</a></nav>
 </body>
 </html>
